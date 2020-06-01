@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PartEquipment
 {
-    public class Class1
+    public class ModulePartEquipment : PartModule
     {
     }
 }
