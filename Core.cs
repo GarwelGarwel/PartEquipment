@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UrgentContracts
+namespace PartEquipment
 {
     /// <summary>
     /// Log levels:

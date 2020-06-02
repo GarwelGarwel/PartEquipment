@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using KSP.UI.Screens;
+using System.IO;
 using System.Linq;
-using UrgentContracts;
+using UnityEngine;
 
 namespace PartEquipment
 {
@@ -11,26 +13,34 @@ namespace PartEquipment
 
         List<Part> Contents { get; set; } = new List<Part>();
 
+        /// <summary>
+        /// Shows a dialog to select and add a new part to the container
+        /// </summary>
         [KSPEvent(guiActiveEditor = true, name = "AddEquipment", guiName = "Add Equipment")]
         public void AddEquipment()
         {
             Core.Log("AddEquipment");
-            EquipPart(PartLoader.getPartInfoByName("batteryPack"));
-            equippedParts++;
+
+            DialogGUIVerticalLayout partSelector = new DialogGUIVerticalLayout();
+            partSelector.AddChild(new DialogGUIContentSizer(UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained, UnityEngine.UI.ContentSizeFitter.FitMode.MinSize));
+            partSelector.AddChildren(PartLoader.LoadedPartsList
+                    .Where(ap => !ap.TechHidden && ap.category != PartCategories.none)
+                    .OrderBy(ap => ap.category)
+                    .Select(ap => new DialogGUIButton(ap.title, () => EquipPart(ap), 200, 30, true)).ToArray());
+            partSelector.AddChild(new DialogGUIButton("Cancel", null, 200, 30, true));
+
+            PopupDialog.SpawnPopupDialog(new MultiOptionDialog("PartEquipmentAddPart", "", "Select Part to Add", HighLogic.UISkin, new DialogGUIScrollList(new Vector2(200, 400), false, true, partSelector)), false, HighLogic.UISkin);
         }
 
         /// <summary>
-        /// Removes last added item
+        /// Removes last added part
         /// </summary>
         [KSPEvent(guiActiveEditor = true, name = "RemoveEquipment", guiName = "Remove Equipment")]
         public void RemoveEquipment()
         {
             Core.Log("RemoveEquipment");
             if (Contents.Count > 0)
-            {
                 UnequipPart(Contents.Last());
-                equippedParts--;
-            }
         }
 
         [KSPEvent(guiActiveEditor = true, name = "ShowEquipment", guiName = "Show Equipment")]
@@ -119,6 +129,7 @@ namespace PartEquipment
                 }
                 else part.Resources.Add(pr);
             }
+            equippedParts++;
         }
 
         void UnequipPart(Part p)
@@ -126,12 +137,13 @@ namespace PartEquipment
             foreach (PartResource pr in p.Resources)
             {
                 Core.Log("Removing " + pr.amount + "/" + pr.maxAmount + " of " + pr.resourceName);
-                part.Resources[pr.resourceName].amount -= pr.amount * (part.Resources[pr.resourceName].amount / part.Resources[pr.resourceName].maxAmount);
+                part.Resources[pr.resourceName].amount *= 1 - part.Resources[pr.resourceName].maxAmount / part.Resources[pr.resourceName].maxAmount;
                 part.Resources[pr.resourceName].maxAmount -= pr.maxAmount;
                 if (part.Resources[pr.resourceName].maxAmount <= 0)
                     part.Resources.Remove(pr.resourceName);
             }
             Contents.Remove(p);
+            equippedParts--;
         }
     }
 }
