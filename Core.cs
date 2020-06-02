@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 namespace PartEquipment
 {
@@ -22,6 +23,8 @@ namespace PartEquipment
         /// Current <see cref="LogLevel"/>: either Debug or Important
         /// </summary>
         public static LogLevel Level => LogLevel.Debug;//.Instance.DebugMode ? LogLevel.Debug : LogLevel.Important;
+
+        public static double GetPartVolume(this Part p) => p.FindModulesImplementing<ModuleEquipmentItem>().Sum(mod => mod.volume);
 
         public static string GetString(this ConfigNode n, string key, string defaultValue = null) => n.HasValue(key) ? n.GetValue(key) : defaultValue;
 

@@ -62,7 +62,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core.cs" />
-    <Compile Include="ModulePartEquipmentContainer.cs" />
+    <Compile Include="ModuleEquipmentContainer.cs" />
+    <Compile Include="ModuleEquipmentItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

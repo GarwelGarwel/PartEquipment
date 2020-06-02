@@ -1,15 +1,19 @@
 ﻿using System.Collections.Generic;
-using KSP.UI.Screens;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 
 namespace PartEquipment
 {
-    public class ModulePartEquipmentContainer : PartModule, IPartCostModifier, IPartMassModifier
+    public class ModuleEquipmentContainer : PartModule, IPartCostModifier, IPartMassModifier
     {
         [KSPField(guiName = "Equipped parts", guiActiveEditor = true)]
         int equippedParts = 0;
+
+        [KSPField]
+        public double volume = 0;
+
+        [KSPField(guiName = "Internal volume", guiActiveEditor = true)]
+        string displayVolume;
 
         List<Part> Contents { get; set; } = new List<Part>();
 
@@ -54,9 +58,10 @@ namespace PartEquipment
 
         public override void OnStart(StartState state)
         {
-            Core.Log("OnStart for part id " + part.persistentId);
+            Core.Log("OnStart(" + state + ") for part " + part.name + ", id " + part.persistentId);
             foreach (Part p in Contents)
                 p.ModulesOnStart();
+            UpdateDisplayVolume();
         }
 
         public override void OnLoad(ConfigNode node)
@@ -72,6 +77,7 @@ namespace PartEquipment
                 equippedParts++;
             }
             Core.Log(Contents.Count + " parts loaded.");
+            //UpdateDisplayVolume();
         }
 
         public override void OnSave(ConfigNode node)
@@ -113,9 +119,27 @@ namespace PartEquipment
 
         public ModifierChangeWhen GetModuleMassChangeWhen() => ModifierChangeWhen.CONSTANTLY;
 
+        public override string GetInfo() => "Internal volume: " + volume + " l";
+
+        void UpdateDisplayVolume()
+        {
+            displayVolume = FreeVolume.ToString("N0") + " / " + volume.ToString("N0") + " l";
+        }
+
+        public double OccupiedVolume => Contents.Sum(p => p.GetPartVolume());
+
+        public double FreeVolume => volume - OccupiedVolume;
+
         void EquipPart(AvailablePart availablePart)
         {
+            Core.Log("EquipPart(" + availablePart.name + ")");
             Part p = availablePart.partPrefab;
+            if (p.GetPartVolume() > FreeVolume)
+            {
+                Core.Log("Can't equip " + p.name + ": its volume is " + p.GetPartVolume() + " l when " + FreeVolume + " / " + volume + " l available.");
+                ScreenMessages.PostScreenMessage("The part doesn't fit. Part volume: " + p.GetPartVolume() + " l. Available volume: " + FreeVolume + " l.", 5);
+                return;
+            }
             p.OnLoad();
             p.ModulesOnStart();
             Contents.Add(p);
@@ -130,20 +154,25 @@ namespace PartEquipment
                 else part.Resources.Add(pr);
             }
             equippedParts++;
+            UpdateDisplayVolume();
         }
 
         void UnequipPart(Part p)
         {
+            Core.Log("UnequipPart(" + p.name + ")");
             foreach (PartResource pr in p.Resources)
             {
-                Core.Log("Removing " + pr.amount + "/" + pr.maxAmount + " of " + pr.resourceName);
-                part.Resources[pr.resourceName].amount *= 1 - part.Resources[pr.resourceName].maxAmount / part.Resources[pr.resourceName].maxAmount;
-                part.Resources[pr.resourceName].maxAmount -= pr.maxAmount;
-                if (part.Resources[pr.resourceName].maxAmount <= 0)
+                PartResource partResource = part.Resources[pr.resourceName];
+                double amountToRemove = partResource.amount * pr.maxAmount / partResource.maxAmount;
+                Core.Log("Removing " + amountToRemove + "/" + partResource.maxAmount + " of " + pr.resourceName);
+                partResource.amount -= amountToRemove;
+                partResource.maxAmount -= pr.maxAmount;
+                if (partResource.maxAmount <= 0)
                     part.Resources.Remove(pr.resourceName);
             }
             Contents.Remove(p);
             equippedParts--;
+            UpdateDisplayVolume();
         }
     }
 }
