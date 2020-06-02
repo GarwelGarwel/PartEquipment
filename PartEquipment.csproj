@@ -62,8 +62,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core.cs" />
-    <Compile Include="ModulePartEquipment.cs" />
+    <Compile Include="ModulePartEquipmentContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GameData\PartEquipment\Patches\Squad.cfg" />
+    <None Include="Squad.cfg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="GameData\PartEquipment\PartEquipment.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
