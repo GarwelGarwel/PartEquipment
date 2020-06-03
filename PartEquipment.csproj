@@ -55,6 +55,11 @@
       <HintPath>..\..\..\..\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\..\..\Steam\steamapps\common\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
@@ -62,13 +67,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core.cs" />
+    <Compile Include="KSPDevUtils\AbstractOrdinaryValueTypeProto.cs" />
+    <Compile Include="KSPDevUtils\IPersistentField.cs" />
+    <Compile Include="KSPDevUtils\KspTypesProto.cs" />
+    <Compile Include="KSPDevUtils\PrimitiveTypesProto.cs" />
+    <Compile Include="KSPDevUtils\StandardOrdinaryTypesProto.cs" />
     <Compile Include="ModuleEquipmentContainer.cs" />
     <Compile Include="ModuleEquipmentItem.cs" />
+    <Compile Include="KSPDevUtils\PartUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="GameData\PartEquipment\Patches\Squad.cfg" />
-    <None Include="Squad.cfg" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="GameData\PartEquipment\PartEquipment.dll" />
